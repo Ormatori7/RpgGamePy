@@ -12,6 +12,7 @@ hero = db.hero
 akatsuki = db.akatsuki
 classement = db.classement
 TeamPlayer = db.equipeJoueur
+PseudoDB = db.pseudo # commence vide pour stocker le pseudo
 
 # // ! --------------------------------------------------
 
@@ -19,17 +20,24 @@ TeamPlayer = db.equipeJoueur
 # // : DB_init()
     # // - DeleteList()    
     # // - CreateList()    
-    # // - InsertCharacter()
+    # // - InsertList()
     # on print afin de savoir si ca a fonctionné 
     
 # // : DeleteList() 
-    # on supprime d'abord les liste des héro/akatsuki s'ils s'y sont déja
+    # on supprime la liste héro
+    # on supp la liste akatsuki 
+    # on supp la liste pseudo
+    # on supp la liste TeamPlayer
     
 # // : CreateList()
-    # on prépare nos données pour les héros dans une liste de dictionnaire 
-    # on prépare nos données pour les personnages de l'akatsuki dans une liste de dictionnaire 
+    # on prépare nos données pour les héros dans une liste 
+    # on prépare nos données pour les personnages de l'akatsuki dans une liste
+    # on prépare nos données pour les personnages de notre TeamPlayer dans une liste 
+    # on prepare nos données pour le stockage de notre pseudo 
     
-# // : InsertCharacter()
+# // : InsertList()
     # on ajouter la liste de héro dans la table héro (avec insert many)
     # on ajouter la liste de perso de l'akatsuki dans la table akatsuki (avec insert many)
+    # on ajoute notre pseudo dans la table pseudo
+    # on ajoute notre team dans la table TeamPlayer
     
