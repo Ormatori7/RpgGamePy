@@ -1,5 +1,7 @@
 # on importe nos variables : hero, akatsuki, classement, TeamPlayer depuis db_init
 from db_init import hero, akatsuki, classement, TeamPlayer, PseudoDB
+from gameData import hero_list, akatsuki_list, TeamPlayer_list
+import random
 
 
 def UpdatePhase():
@@ -8,38 +10,103 @@ def UpdatePhase():
     
     
 def ChooseRandomEnemy():
-    cursor = akatsuki.aggregate([{"$sample": {"size": 1}}, {"$project": {"_id": 0, "id": 0}},])
-    RandomEnemy = list(cursor)
-    print(f" le membre de l'akatsuki est {RandomEnemy}")
-    return RandomEnemy
+    
+    if akatsuki_list: # si liste pas vide alors 
+        enemy = random.choice(akatsuki_list).copy()
+        print(f" le membre de l'akatsuki est {enemy}")
+        return enemy
+    return None 
 
 
 
 def Fight(currentEnemy):
-    StillStanding = TeamStillAlive()
-    if StillStanding:
-        print("on continue le combat")
-        CurrentWave = WaveIncrement()
-        # // - ShowCurrentWave(CurrentWave)
-        # // - HeroAttack(CurrentEnnemy)
-        # // - EnnemyAttack(TeamPlayer)
-    else:
-        print("fin du combat")
+    print(f"l'ennemi est {currentEnemy}") # // ! test pour l'instant
+    # CurrentWave = WaveIncrement()
+    while TeamStillAlive() and currentEnemy.get("hp", 0) > 0:
+        HeroAttack(currentEnemy)
+        if currentEnemy.get("hp", 0) > 0:
+            # // ! EnnemyAttack(TeamPlayer)
+            pass
+    if TeamStillAlive():
+        print("l'equipe a gagner")
         #endscreen
         #score()
+    else:
+        print("l'ennemi a gagner ")
+        
     
     
 def TeamStillAlive():
-    for i in TeamPlayer.find():
-        if i.get("hp", 0) > 0:
+    for i in TeamPlayer_list:
+        if IsHeroStillAlive(i):
             return True
-        return False
+    return False
+       
+    
+def IsHeroStillAlive(CurrentHero):
+    if CurrentHero.get("hp", 0) > 0:
+        return True
+    return False
+        
+
+def WaveIncrement(currentWave):
+    currentWave += 1
+    ShowCurrentWave(currentWave)
+    return currentWave
+
+
+def ShowCurrentWave(Wave):
+    print(f"la vague actuel est la vague {Wave}")
     
     
+def HeroAttack(currentEnemy):
+    for i in TeamPlayer_list:
+        CanAttack = IsHeroStillAlive(i)
+        if CanAttack:
+            damageToDeal = i.get("atk", 0) # renvoie 0 si n'existe pas
+            print(f"le hero {i} attaque de {damageToDeal} dégats !!")
+            EnemyTakeDamage(damageToDeal, currentEnemy)
+                
+        else:
+            print("le hero est mort, il ne peut donc pas attaquer")
+            
+    EnenyAttack()
+        
     
-def WaveIncrement():
-    wave = 1
+def EnemyTakeDamage(Damage, Enemy):
+    EnemyHealth = Enemy.get("hp", 0)
+    EnemyDefense = Enemy.get("def", 0)
     
+    DamageTaken = Damage - EnemyDefense
+    if DamageTaken < 0:
+        DamageTaken = 0
+    
+    Enemy["hp"] = EnemyHealth - DamageTaken    
+    if Enemy["hp"] < 0:
+        Enemy["hp"] = 0
+    print(f"l'ennemi a encore {Enemy["hp"]} de vie")
+        
+    return Enemy
+
+    
+    
+def EnemyAttack():
+    # fusion de la logique hero/ennemi plus tard
+    # // ! terminer l'implémentation de l'ennemi afin de verifier s'il est vivant 
+    canAttack = EnemyStillAlive()
+    if canAttack:
+        damageToDeal = akatsuki_list.get("atk", 0)
+        HeroTakeDamage(damageToDeal)
+    
+def EnemyStillAlive(enemy):  
+    if enemy.get("hp", 0) > 0:
+        return True
+    return False  
+    pass
+
+def HeroTakeDamage(damageToDeal):
+    pass
+
 # // : UpdatePhase()
     # CurrentEnnemy = // - ChooseRandomEnemy()
     #// - ShowCurrentEnnemy(CurrentEnnemy)
@@ -120,3 +187,5 @@ def WaveIncrement():
 
 # // : SaveScore()
     # enregistrer dans la db dans la partie classement le nombre de vague et le nom   
+    
+# // ! modifer liste et pas bdd

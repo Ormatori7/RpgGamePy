@@ -2,6 +2,13 @@
 from db_init import hero, akatsuki, classement, TeamPlayer, PseudoDB
 # on importe la fonction StartFight de la logic de jeu de gameLogic
 from gameLogic import UpdatePhase
+import sys  
+
+from gameData import hero_list, akatsuki_list, TeamPlayer_list
+
+
+
+
 
 Menu = [
     "1 - lancer le jeu",
@@ -18,22 +25,22 @@ def ShowMenu():
 
 
 def NavigateMenu():
-    choix = ChoiceValid()
-    if int(choix) == 1:
+    choice = IsValidChoice()
+    if int(choice) == 1:
         StartGame()
-    # if int(choix) == 2:
+    # if int(choice) == 2:
     #     # ShowRank()
-    # if int(choix) == 3:
-    #     # Leave()
+    if int(choice) == 3:
+        Leave()
 
     
-def ChoiceValid():
+def IsValidChoice():
     while True:
-        ChoixJoueur = input("Entrez votrez choix : ")
-        if ChoixJoueur.isdigit() and 1 <= int(ChoixJoueur) <= 3:
-            return int(ChoixJoueur)
+        PlayerChoice = input("Entrez votrez choix : ")
+        if PlayerChoice.isdigit() and 1 <= int(PlayerChoice) <= 3:
+            return int(PlayerChoice)
         else:
-            print(f"le choix {ChoixJoueur} n'est pas proposé, veuillez choisir de nouveau")
+            print(f"le choix {PlayerChoice} n'est pas proposé, veuillez choisir de nouveau")
             
    
    
@@ -41,7 +48,9 @@ def ChoiceValid():
 def StartGame():
     pseudo = ChoosePseudo(1, 10)
     SelectTeam()
-    UpdatePhase()    
+    UpdatePhase()  
+    
+     
    
 def ChoosePseudo(min_longueur, max_longeur):
     print(f"Entrez un pseudo entre {min_longueur} et {max_longeur}")
@@ -68,47 +77,50 @@ def IsPseudoValid(PseudoInput, min_longueur, max_longeur):
             
     
 def SelectTeam():
-    TeamPlayer.delete_many({})
+    TeamPlayer_list.clear()
     remainingHero = 3
     while remainingHero > 0:
         succes = SelectHeroInList()  
         if succes:
             remainingHero -= 1
     print("votre equipe :")
-    for i in TeamPlayer.find({}, {"_id": 0, "id_ref": 0}):
+    for i in TeamPlayer_list:
         print(i)
         
     
 def SelectHeroInList():
     print("La liste des heros : ")
-    for i in hero.find({}, {"_id": 0, "id_ref": 0}):
+    for i in hero_list:
         
         print(i)
+        
     HeroSelected = input("choissisez un hero : ")
     HeroToFind = IsHeroValid(HeroSelected)
+    
     if HeroToFind:
-        del HeroToFind["_id"]
-        TeamPlayer.insert_one(HeroToFind)        
+        TeamPlayer_list.append(HeroToFind)
+        hero_list.remove(HeroToFind)
+        # // ! modifier cette partie pour mettre une comparaison entre teamPlayer et hero       
         print(f"le hero {HeroSelected} a été ajouté a votre team ")
         return True
     else:
+        print("le hero n'existe pas")
         return False
         
     
 def IsHeroValid(HeroSelected):
-    heroInDB = hero.find_one({"nom": HeroSelected})
-    if heroInDB:
-        print("le hero existe")
-        return heroInDB
-
-    else:
-        print("le hero n'existe pas ")
-        return None
+    for i in hero_list:
+        if i.get("nom") == HeroSelected:
+            return i.copy()
+    return None
         
+        
+def Leave():
+    sys.exit()
     
 
 # // : NavigateMenu() 
-    #Choix = // - ChoiceValid() 
+    #Choix = // - IsValidChoice() 
     # if int(Choix) = 1 
         # // - StartGame()
     # if int(Choix) = 2
@@ -117,10 +129,10 @@ def IsHeroValid(HeroSelected):
         # // - Leave()
    
 
-# // : ChoiceValid()
-    # ChoixJoueur = input("votre choix =>")
-    # if ChoixJoueur.isdigit() and 1 <= choixJoueur <= 3
-        # return ChoixJoueur
+# // : IsValidChoice()
+    # PlayerChoice = input("votre choix =>")
+    # if PlayerChoice.isdigit() and 1 <= PlayerChoice <= 3
+        # return PlayerChoice
     #  # else 
         # return false et choisir de nouveau (avec un print comme quoi c'est pas un choix valide)
 
