@@ -1,23 +1,112 @@
 # on importe nos variables : hero, akatsuki, classement, TeamPlayer depuis db_init
+from db_init import hero, akatsuki, classement, TeamPlayer, PseudoDB
 # on importe la fonction StartFight de la logic de jeu de gameLogic
+from gameLogic import UpdatePhase
+
+Menu = [
+    "1 - lancer le jeu",
+    "2 - afficher les scores",
+    "3 - quitter"
+]
+
+def ShowMenu():
+    for i in Menu:
+        print(i)
+        print("veuillez choisir une option")
+    NavigateMenu()
 
 
-# MENU = [
-#           "1 -lancer le jeu",
-#           "2 - afficher les scores"
-#           "3 - Quitter",
-# ]
 
+def NavigateMenu():
+    choix = ChoiceValid()
+    if int(choix) == 1:
+        StartGame()
+    # if int(choix) == 2:
+    #     # ShowRank()
+    # if int(choix) == 3:
+    #     # Leave()
 
-
-#//: ShowMenu()
-    # for i in MENU 
-        # print(i)
-    # Choisir une option"
-    # // - NavigateMenu()
     
+def ChoiceValid():
+    while True:
+        ChoixJoueur = input("Entrez votrez choix : ")
+        if ChoixJoueur.isdigit() and 1 <= int(ChoixJoueur) <= 3:
+            return int(ChoixJoueur)
+        else:
+            print(f"le choix {ChoixJoueur} n'est pas proposé, veuillez choisir de nouveau")
+            
+   
+   
+
+def StartGame():
+    pseudo = ChoosePseudo(1, 10)
+    SelectTeam()
+    UpdatePhase()    
+   
+def ChoosePseudo(min_longueur, max_longeur):
+    print(f"Entrez un pseudo entre {min_longueur} et {max_longeur}")
+    while True:
+        PseudoInput = input("Votre pseudo : ")
+        Isvalid = IsPseudoValid(PseudoInput, min_longueur, max_longeur)
+        if Isvalid:
+            print(f"le pseudo choisi est : {PseudoInput} ") 
+            PseudoDB.delete_one({}) # // + on supp le pseudo existant de la db
+            PseudoDB.insert_one({ "pseudo": PseudoInput}) # // + ajout du pseudo dans la db
+            print("pseudoAJouté")
+            return PseudoInput 
+            
+                
+def IsPseudoValid(PseudoInput, min_longueur, max_longeur):
+        if not PseudoInput.isalpha(): # alpha pour voir si tout les charactere sont des lettre et pas des chiffres
+            print("seuls les lettres sont accepté")
+            return False
+        if not (min_longueur <= len(PseudoInput) <= max_longeur):
+            print(f"le pseudo doit etre compris entre {min_longueur}et {max_longeur} characteres ")
+            return False
+        return True
+        
+            
     
+def SelectTeam():
+    TeamPlayer.delete_many({})
+    remainingHero = 3
+    while remainingHero > 0:
+        succes = SelectHeroInList()  
+        if succes:
+            remainingHero -= 1
+    print("votre equipe :")
+    for i in TeamPlayer.find({}, {"_id": 0, "id_ref": 0}):
+        print(i)
+        
     
+def SelectHeroInList():
+    print("La liste des heros : ")
+    for i in hero.find({}, {"_id": 0, "id_ref": 0}):
+        
+        print(i)
+    HeroSelected = input("choissisez un hero : ")
+    HeroToFind = IsHeroValid(HeroSelected)
+    if HeroToFind:
+        del HeroToFind["_id"]
+        TeamPlayer.insert_one(HeroToFind)        
+        print(f"le hero {HeroSelected} a été ajouté a votre team ")
+        return True
+    else:
+        return False
+        
+    
+def IsHeroValid(HeroSelected):
+    heroInDB = hero.find_one({"nom": HeroSelected})
+    if heroInDB:
+        print("le hero existe")
+        return heroInDB
+
+    else:
+        print("le hero n'existe pas ")
+        return None
+        
+    
+
 # // : NavigateMenu() 
     #Choix = // - ChoiceValid() 
     # if int(Choix) = 1 
@@ -122,3 +211,7 @@
     # print (votre team est : {TeamPlayer})
     
 
+
+
+
+ShowMenu()

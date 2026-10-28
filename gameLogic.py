@@ -1,7 +1,45 @@
 # on importe nos variables : hero, akatsuki, classement, TeamPlayer depuis db_init
+from db_init import hero, akatsuki, classement, TeamPlayer, PseudoDB
+
+
+def UpdatePhase():
+    currentEnemy = ChooseRandomEnemy()
+    Fight(currentEnemy)
+    
+    
+def ChooseRandomEnemy():
+    cursor = akatsuki.aggregate([{"$sample": {"size": 1}}, {"$project": {"_id": 0, "id": 0}},])
+    RandomEnemy = list(cursor)
+    print(f" le membre de l'akatsuki est {RandomEnemy}")
+    return RandomEnemy
 
 
 
+def Fight(currentEnemy):
+    StillStanding = TeamStillAlive()
+    if StillStanding:
+        print("on continue le combat")
+        CurrentWave = WaveIncrement()
+        # // - ShowCurrentWave(CurrentWave)
+        # // - HeroAttack(CurrentEnnemy)
+        # // - EnnemyAttack(TeamPlayer)
+    else:
+        print("fin du combat")
+        #endscreen
+        #score()
+    
+    
+def TeamStillAlive():
+    for i in TeamPlayer.find():
+        if i.get("hp", 0) > 0:
+            return True
+        return False
+    
+    
+    
+def WaveIncrement():
+    wave = 1
+    
 # // : UpdatePhase()
     # CurrentEnnemy = // - ChooseRandomEnemy()
     #// - ShowCurrentEnnemy(CurrentEnnemy)
@@ -26,7 +64,8 @@
     
 
 #// : Fight(CurrentEnnemy)
-    # check si au moins 1 hero a > 0 hp 
+    # check si au moins 1 hero a > 0 hp ( au niveau de la db) 
+    # TeamStillAlive = // - TeamStillAlive()
         # si oui alors 
             # CurrentWave = // - WaveIncrement()
             # // - ShowCurrentWave(CurrentWave)
@@ -37,6 +76,14 @@
             # // - SaveScore()
     
     
+    
+# // : TeamStillAlive()
+    # for each hero in table hero
+        # regarder si au moins 1 hero a vie > 0
+            # si oui alors :
+                # return true (au moins 1 héro en vie)
+            # si non alors
+                # return false (tout les heros sont mort)
     
 # // : HeroAttack(CurrentEnnemy)
     # boucle foreach hero dans TeamPlayer (on ne compte pas ceux qui sont mort)
@@ -50,7 +97,7 @@
         
     
 # // : CheckIfEnnemyAlive(CurrentEnnemy)
-    # simple si CurrentEnnmy (vie) > 0
+    # si CurrentEnnmy (vie) > 0
         # return True
     # sinon
         # return False
@@ -62,10 +109,14 @@
             # le monstre attaque hero
             # on update la db avec le hero et sa nouvelle vie (dans TeamPlayer)
         # sinon
-            # // - RemoveDeadHero()
             # on continue au prochain hero 
+            # // ! besoin d'une logique pour si all hero dead alors on s'arrete 
     
-# // : RemoveDeadHero()
-    # 
+
     
-# // : MenuFin()
+# // : EndScreen()
+    # afficher la vague et le pseudo
+    
+
+# // : SaveScore()
+    # enregistrer dans la db dans la partie classement le nombre de vague et le nom   
